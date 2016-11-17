@@ -24,7 +24,7 @@ public class GameMatrix {
 				} else {
 					Vector2 v = new Vector2();
 					matrix[i][j] = v;
-					matrix[j][i] = new Vector2(v.x, v.y);
+					matrix[j][i] = new Vector2(v.y, v.x);
 				}
 			}
 		}

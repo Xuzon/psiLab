@@ -3,6 +3,7 @@ package window;
 import java.util.Random;
 
 public class PlayerInfo {
+	public String type = "Fijo";
 	public String name;
 	public int id;
 	public int g;
@@ -25,7 +26,8 @@ public class PlayerInfo {
 
 	public String ToString() {
 		String toRet = "";
-		toRet = this.name + "    " + id + "  " + g + "  " + p + "    " + partial + "        " + total;
+		toRet = this.type + "      " + this.name + "    " + id + "  " + g + "  " + p + "    " + partial + "        "
+				+ total;
 		return toRet;
 	}
 }

@@ -14,6 +14,7 @@ import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.MenuShortcut;
+import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class GameFrame extends Frame {
 	protected int height = 512;
 	protected String title = "GUI";
 	protected GridBagLayout GBL = new GridBagLayout();
+	protected GridBagLayout GBLMatch = new GridBagLayout();
 	protected GridBagConstraints GBC = new GridBagConstraints();
 	protected GameActionListener gActionListener;
 	protected GameItemListener gItemListener;
@@ -58,6 +60,24 @@ public class GameFrame extends Frame {
 	protected int nGames;
 	protected int matrixTurnsChange = 10;
 	protected int delay = 5;
+
+	// *************CURRENT MATCH STATS PANEL
+	protected Panel currentMatchStatistics;
+	protected Label statisticsTitle;
+	// stats
+	protected Label winRoundsPlayer1;
+	protected Label lostRoundsPlayer1;
+	protected Label payoffPlayer1;
+	protected Label winRoundsPlayer2;
+	protected Label lostRoundsPlayer2;
+	protected Label payoffPlayer2;
+	// static labels
+	protected Label wonLabel;
+	protected Label lostLabel;
+	protected Label payoffLabel;
+	protected Label wonLabel2;
+	protected Label lostLabel2;
+	protected Label payoffLabel2;
 
 	protected GameMatrix gameMatrix;
 
@@ -129,7 +149,7 @@ public class GameFrame extends Frame {
 		GBC.gridheight = 2;
 		GBC.weightx = 1;
 		GBC.weighty = 1;
-		GBC.insets = new Insets(0, 0, 10, 0);
+		GBC.insets = new Insets(3, 3, 3, 3);
 		this.add(logList, GBC);
 		GBC = new GridBagConstraints();
 
@@ -144,21 +164,250 @@ public class GameFrame extends Frame {
 		GBC.anchor = GridBagConstraints.CENTER;
 		GBC.fill = GridBagConstraints.BOTH;
 		GBC.gridx = 0;
-		GBC.gridy = 0;
+		GBC.gridy = 1;
 		GBC.gridwidth = 2;
-		GBC.gridheight = 2;
+		GBC.gridheight = 1;
 		GBC.weightx = 0.1;
 		GBC.weighty = 5;
 		// up,left,bottom,right
 		GBC.insets = new Insets(10, 10, 0, 10);
 		this.add(playersList, GBC);
 		GBC = new GridBagConstraints();
+
+		SetCurrentMatchPanel();
+	}
+
+	private void SetCurrentMatchPanel() {
+		currentMatchStatistics = new Panel();
+		currentMatchStatistics.setBackground(labelColor);
+		currentMatchStatistics.setLayout(GBLMatch);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 0;
+		GBC.gridy = 0;
+		GBC.gridwidth = 2;
+		GBC.gridheight = 1;
+		GBC.weightx = 0.1;
+		GBC.weighty = 5;
+		// up,left,bottom,right
+		GBC.insets = new Insets(10, 10, 10, 10);
+		this.add(currentMatchStatistics, GBC);
+		GBC = new GridBagConstraints();
+
+		statisticsTitle = new Label("PLAYER1 VS PLAYER2");
+		statisticsTitle.setAlignment(Label.CENTER);
+		statisticsTitle.setForeground(labelColor);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 0;
+		GBC.gridy = 0;
+		GBC.gridwidth = 6;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(2, 2, 5, 2);
+		currentMatchStatistics.add(statisticsTitle, GBC);
+		GBC = new GridBagConstraints();
+
+		wonLabel = new Label("WON");
+		wonLabel.setForeground(labelColor);
+		wonLabel.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 0;
+		GBC.gridy = 1;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 1, 1, 1);
+		currentMatchStatistics.add(wonLabel, GBC);
+		GBC = new GridBagConstraints();
+
+		winRoundsPlayer1 = new Label("0");
+		winRoundsPlayer1.setForeground(labelColor);
+		winRoundsPlayer1.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 0;
+		GBC.gridy = 2;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 1, 1, 1);
+		currentMatchStatistics.add(winRoundsPlayer1, GBC);
+		GBC = new GridBagConstraints();
+
+		lostLabel = new Label("LOST");
+		lostLabel.setForeground(labelColor);
+		lostLabel.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 1;
+		GBC.gridy = 1;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 1, 1, 1);
+		currentMatchStatistics.add(lostLabel, GBC);
+		GBC = new GridBagConstraints();
+
+		lostRoundsPlayer1 = new Label("0");
+		lostRoundsPlayer1.setForeground(labelColor);
+		lostRoundsPlayer1.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 1;
+		GBC.gridy = 2;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 1, 1, 1);
+		currentMatchStatistics.add(lostRoundsPlayer1, GBC);
+		GBC = new GridBagConstraints();
+
+		payoffLabel = new Label("PAYOFF");
+		payoffLabel.setForeground(labelColor);
+		payoffLabel.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 2;
+		GBC.gridy = 1;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 1, 1, 3);
+		currentMatchStatistics.add(payoffLabel, GBC);
+		GBC = new GridBagConstraints();
+
+		payoffPlayer1 = new Label("0");
+		payoffPlayer1.setForeground(labelColor);
+		payoffPlayer1.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 2;
+		GBC.gridy = 2;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 1, 1, 3);
+		currentMatchStatistics.add(payoffPlayer1, GBC);
+		GBC = new GridBagConstraints();
+
+		wonLabel2 = new Label("WON");
+		wonLabel2.setForeground(labelColor);
+		wonLabel2.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 3;
+		GBC.gridy = 1;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 3, 1, 1);
+		currentMatchStatistics.add(wonLabel2, GBC);
+		GBC = new GridBagConstraints();
+
+		winRoundsPlayer2 = new Label("0");
+		winRoundsPlayer2.setForeground(labelColor);
+		winRoundsPlayer2.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 3;
+		GBC.gridy = 2;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 3, 1, 1);
+		currentMatchStatistics.add(winRoundsPlayer2, GBC);
+		GBC = new GridBagConstraints();
+
+		lostLabel2 = new Label("LOST");
+		lostLabel2.setForeground(labelColor);
+		lostLabel2.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 4;
+		GBC.gridy = 1;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 1, 1, 1);
+		currentMatchStatistics.add(lostLabel2, GBC);
+		GBC = new GridBagConstraints();
+
+		lostRoundsPlayer2 = new Label("0");
+		lostRoundsPlayer2.setForeground(labelColor);
+		lostRoundsPlayer2.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 4;
+		GBC.gridy = 2;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 1, 1, 1);
+		currentMatchStatistics.add(lostRoundsPlayer2, GBC);
+		GBC = new GridBagConstraints();
+
+		payoffLabel2 = new Label("PAYOFF");
+		payoffLabel2.setForeground(labelColor);
+		payoffLabel2.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 5;
+		GBC.gridy = 1;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 1, 1, 1);
+		currentMatchStatistics.add(payoffLabel2, GBC);
+		GBC = new GridBagConstraints();
+
+		payoffPlayer2 = new Label("0");
+		payoffPlayer2.setForeground(labelColor);
+		payoffPlayer2.setAlignment(Label.CENTER);
+		GBC.anchor = GridBagConstraints.CENTER;
+		GBC.fill = GridBagConstraints.BOTH;
+		GBC.gridx = 5;
+		GBC.gridy = 2;
+		GBC.gridwidth = 1;
+		GBC.gridheight = 1;
+		GBC.weightx = 1;
+		GBC.weighty = 1;
+		// up,left,bottom,right
+		GBC.insets = new Insets(1, 1, 1, 1);
+		currentMatchStatistics.add(payoffPlayer2, GBC);
+		GBC = new GridBagConstraints();
+
 	}
 
 	private void ButtonsSetup() {
 		newGameButton = new Button("New Game");
-		newGameButton.setBackground(newGameButtonColor);
 		newGameButton.addActionListener(gActionListener);
+		newGameButton.setBackground(newGameButtonColor);
 		GBC.anchor = GridBagConstraints.CENTER;
 		GBC.fill = GridBagConstraints.HORIZONTAL;
 		GBC.gridx = 1;
@@ -202,6 +451,7 @@ public class GameFrame extends Frame {
 	private void LabelSetup() {
 		nRoundsLabel = new Label("NRounds = 0");
 		nRoundsLabel.setForeground(labelColor);
+		nRoundsLabel.setAlignment(Label.CENTER);
 		GBC.anchor = GridBagConstraints.CENTER;
 		GBC.fill = GridBagConstraints.HORIZONTAL;
 		GBC.gridx = 0;
@@ -215,6 +465,7 @@ public class GameFrame extends Frame {
 
 		nGamesLabel = new Label("NGames = 0");
 		nGamesLabel.setForeground(labelColor);
+		nGamesLabel.setAlignment(Label.CENTER);
 		GBC.anchor = GridBagConstraints.CENTER;
 		GBC.fill = GridBagConstraints.HORIZONTAL;
 		GBC.gridx = 0;
@@ -229,6 +480,7 @@ public class GameFrame extends Frame {
 		nPlayersLabel = new Label("NPlayers = 0");
 		nPlayersLabel.setText("NPlayers = " + nPlayers);
 		nPlayersLabel.setForeground(labelColor);
+		nPlayersLabel.setAlignment(Label.CENTER);
 		GBC.anchor = GridBagConstraints.CENTER;
 		GBC.fill = GridBagConstraints.HORIZONTAL;
 		GBC.gridx = 0;
@@ -316,6 +568,21 @@ public class GameFrame extends Frame {
 		nRoundsLabel.setBackground(color);
 		nPlayersLabel.setBackground(color);
 		nGamesLabel.setBackground(color);
+		// current match
+		statisticsTitle.setBackground(color);
+		winRoundsPlayer1.setBackground(color);
+		lostRoundsPlayer1.setBackground(color);
+		payoffPlayer1.setBackground(color);
+		winRoundsPlayer2.setBackground(color);
+		lostRoundsPlayer2.setBackground(color);
+		payoffPlayer2.setBackground(color);
+		wonLabel.setBackground(color);
+		lostLabel.setBackground(color);
+		payoffLabel.setBackground(color);
+		wonLabel2.setBackground(color);
+		lostLabel2.setBackground(color);
+		payoffLabel2.setBackground(color);
+
 	}
 
 	public void SetRounds(int rounds) {
@@ -373,7 +640,7 @@ public class GameFrame extends Frame {
 
 	public void RefreshPlayersList() {
 		playersList.removeAll();
-		playersList.add("Nombre Id G P Parcial Total");
+		playersList.add("Tipo    Nombre Id G P Parcial Total");
 		for (PlayerInfo pI : playersInfoList) {
 			playersList.add(pI.ToString());
 		}

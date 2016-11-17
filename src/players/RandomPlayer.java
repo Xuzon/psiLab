@@ -1,5 +1,5 @@
 package players;
 
-public class RandomPlayer {
+public class RandomPlayer extends Player {
 
 }
