@@ -1,6 +1,6 @@
-package window;
 
-public class LogMessage {
+
+public class psi27_LogMessage {
 	public enum LogLevel {
 		INFO, DETAILED
 	};
@@ -8,7 +8,7 @@ public class LogMessage {
 	public LogLevel myLogLevel;
 	public String message;
 
-	public LogMessage(String message, LogLevel logLevel) {
+	public psi27_LogMessage(String message, LogLevel logLevel) {
 		this.message = message;
 		myLogLevel = logLevel;
 	}

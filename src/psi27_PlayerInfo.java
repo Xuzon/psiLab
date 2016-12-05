@@ -1,8 +1,8 @@
-package window;
 
-import java.util.Random;
+import jade.core.AID;
 
-public class PlayerInfo {
+public class psi27_PlayerInfo {
+	public AID aid;
 	public String type = "Fijo";
 	public String name;
 	public int id;
@@ -11,17 +11,15 @@ public class PlayerInfo {
 	public int partial;
 	public int total;
 
-	public PlayerInfo() {
+	public psi27_PlayerInfo() {
 		name = "";
-		Random random = new Random();
-		id = g = p = partial = total = random.nextInt(100);
+		id = g = p = partial = total = 0;
 	}
 
-	public PlayerInfo(String name, int id) {
+	public psi27_PlayerInfo(String name, int id) {
 		this.name = name;
 		this.id = id;
-		Random random = new Random();
-		g = p = partial = total = random.nextInt(100);
+		g = p = partial = total = 0;
 	}
 
 	public String ToString() {

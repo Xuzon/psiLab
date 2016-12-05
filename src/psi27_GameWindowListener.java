@@ -1,23 +1,23 @@
-package window;
+
 
 import java.awt.Color;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-public class GameWindowListener implements WindowListener {
-	GameFrame gF;
+public class psi27_GameWindowListener implements WindowListener {
+	psi27_GameFrame gF;
 	protected static final Color unFocusedBackgroundColor = Color.BLACK;
 
-	public GameWindowListener() {
+	public psi27_GameWindowListener() {
 	}
 
-	public GameWindowListener(GameFrame gF) {
+	public psi27_GameWindowListener(psi27_GameFrame gF) {
 		this.gF = gF;
 	}
 
 	@Override
 	public void windowActivated(WindowEvent arg0) {
-		gF.ChangeComponentsBackgroundColor(GameFrame.backgroundColor);
+		gF.ChangeComponentsBackgroundColor(psi27_GameFrame.backgroundColor);
 	}
 
 	@Override

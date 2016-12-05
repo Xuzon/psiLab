@@ -1,18 +1,17 @@
-package window;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JOptionPane;
 
-public class GameActionListener implements ActionListener {
+public class psi27_GameActionListener implements ActionListener {
 
-	protected GameFrame gF;
+	protected psi27_GameFrame gF;
 
-	public GameActionListener() {
+	public psi27_GameActionListener() {
 	}
 
-	public GameActionListener(GameFrame gF) {
+	public psi27_GameActionListener(psi27_GameFrame gF) {
 		this.gF = gF;
 	}
 
@@ -68,8 +67,10 @@ public class GameActionListener implements ActionListener {
 
 	private void NewGame() {
 		String message = "Acomódate, una nueva partida va a emepezar";
-		JOptionPane.showMessageDialog(gF, message, "New game", JOptionPane.INFORMATION_MESSAGE);
-		gF.AddMessageToLog(message);
+		// JOptionPane.showMessageDialog(gF, message, "New game",
+		// JOptionPane.INFORMATION_MESSAGE);
+		gF.AddMessageToLog(message, null);
+		gF.NewGame();
 	}
 
 	private void ChangeRounds() {
@@ -142,12 +143,18 @@ public class GameActionListener implements ActionListener {
 
 	private void PauseGame() {
 		String message = "GAME PAUSED";
-		gF.AddMessageToLog(message);
+		gF.AddMessageToLog(message, null);
+		if (gF.referee != null) {
+			gF.referee.Pause();
+		}
 	}
 
 	private void ResumeGame() {
 		String message = "GAME RESUMED";
-		gF.AddMessageToLog(message);
+		gF.AddMessageToLog(message, null);
+		if (gF.referee != null) {
+			gF.referee.Resume();
+		}
 	}
 
 }

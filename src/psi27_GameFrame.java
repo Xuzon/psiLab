@@ -1,5 +1,3 @@
-package window;
-
 import java.awt.Button;
 import java.awt.CheckboxMenuItem;
 import java.awt.Color;
@@ -23,12 +21,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import window.LogMessage.LogLevel;
-
-public class GameFrame extends Frame {
+public class psi27_GameFrame extends Frame {
 
 	private static final long serialVersionUID = 1L;
-	protected ArrayList<LogMessage> messageList = new ArrayList<LogMessage>();
+	protected ArrayList<psi27_LogMessage> messageList = new ArrayList<psi27_LogMessage>();
 	public static final Color backgroundColor = new Color(31, 105, 127);
 	protected static final Color newGameButtonColor = new Color(255, 238, 26);
 	protected static final Color stopGameButtonColor = new Color(178, 26, 72);
@@ -40,25 +36,26 @@ public class GameFrame extends Frame {
 	protected GridBagLayout GBL = new GridBagLayout();
 	protected GridBagLayout GBLMatch = new GridBagLayout();
 	protected GridBagConstraints GBC = new GridBagConstraints();
-	protected GameActionListener gActionListener;
-	protected GameItemListener gItemListener;
+	protected psi27_GameActionListener gActionListener;
+	protected psi27_GameItemListener gItemListener;
 	protected JScrollPane scrollPane;
 	protected JTextArea matrixArea;
 	protected List logList;
 	protected boolean logActivated = true;
-	protected LogLevel activeLogLevel = LogLevel.INFO;
+	protected psi27_LogMessage.LogLevel activeLogLevel = psi27_LogMessage.LogLevel.INFO;
 	protected List playersList;
-	protected ArrayList<PlayerInfo> playersInfoList = new ArrayList<PlayerInfo>();
+	protected ArrayList<psi27_PlayerInfo> playersInfoList = new ArrayList<psi27_PlayerInfo>();
 	protected Button newGameButton;
 	protected Button stopGameButton;
 	protected Button resumeGameButton;
 	protected Label nRoundsLabel;
-	protected int nRounds;
+	protected int nRounds = 100;
 	protected Label nPlayersLabel;
 	protected int nPlayers;
 	protected Label nGamesLabel;
 	protected int nGames;
 	protected int matrixTurnsChange = 10;
+	protected float matrixChangePercentage = 10;
 	protected int delay = 5;
 
 	// *************CURRENT MATCH STATS PANEL
@@ -79,12 +76,14 @@ public class GameFrame extends Frame {
 	protected Label lostLabel2;
 	protected Label payoffLabel2;
 
-	protected GameMatrix gameMatrix;
+	protected psi27_GameMatrix gameMatrix;
 
-	public GameFrame() {
+	protected Referee referee;
+
+	public psi27_GameFrame() {
 	}
 
-	public GameFrame(int width, int height, String title) {
+	public psi27_GameFrame(int width, int height, String title) {
 		this.width = width;
 		this.height = height;
 		this.title = title;
@@ -92,8 +91,24 @@ public class GameFrame extends Frame {
 		int x = (int) dim.getWidth() / 2 - width / 2;
 		int y = (int) dim.getHeight() / 2 - height / 2;
 		Rectangle rect = new Rectangle(x, y, width, height);
-		gActionListener = new GameActionListener(this);
-		gItemListener = new GameItemListener(this);
+		gActionListener = new psi27_GameActionListener(this);
+		gItemListener = new psi27_GameItemListener(this);
+		this.setLayout(GBL);
+		SetupWindow();
+		ActivateWindow(title, rect);
+	}
+
+	public psi27_GameFrame(int width, int height, String title, Referee referee) {
+		this.width = width;
+		this.height = height;
+		this.title = title;
+		this.referee = referee;
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		int x = (int) dim.getWidth() / 2 - width / 2;
+		int y = (int) dim.getHeight() / 2 - height / 2;
+		Rectangle rect = new Rectangle(x, y, width, height);
+		gActionListener = new psi27_GameActionListener(this);
+		gItemListener = new psi27_GameItemListener(this);
 		this.setLayout(GBL);
 		SetupWindow();
 		ActivateWindow(title, rect);
@@ -103,7 +118,7 @@ public class GameFrame extends Frame {
 		this.setBounds(rect);
 		this.setTitle(title);
 		this.setVisible(true);
-		this.addWindowListener(new GameWindowListener(this));
+		this.addWindowListener(new psi27_GameWindowListener(this));
 	}
 
 	protected void SetupWindow() {
@@ -118,7 +133,7 @@ public class GameFrame extends Frame {
 	private void AreasSetup() {
 		matrixArea = new JTextArea();
 		matrixArea.setEditable(false);
-		gameMatrix = new GameMatrix(5);
+		gameMatrix = new psi27_GameMatrix(5);
 		matrixArea.setText(gameMatrix.ToString());
 		matrixArea.setForeground(labelColor);
 		GBC.anchor = GridBagConstraints.CENTER;
@@ -135,11 +150,7 @@ public class GameFrame extends Frame {
 		GBC = new GridBagConstraints();
 
 		logList = new List();
-		for (int i = 0; i < 10; i++) {
-			LogLevel logLevel = (i % 2) == 0 ? LogLevel.INFO : LogLevel.DETAILED;
-			messageList.add(new LogMessage("LOG ENTRY :" + i, logLevel));
-		}
-		RefreshLog(true, LogLevel.INFO);
+		RefreshLog(true, psi27_LogMessage.LogLevel.INFO);
 		logList.setForeground(labelColor);
 		GBC.anchor = GridBagConstraints.CENTER;
 		GBC.fill = GridBagConstraints.BOTH;
@@ -155,11 +166,6 @@ public class GameFrame extends Frame {
 
 		playersList = new List();
 		playersList.setForeground(labelColor);
-		for (int i = 0; i < 10; i++) {
-			PlayerInfo pI = new PlayerInfo("Player", i);
-			playersInfoList.add(pI);
-			nPlayers++;
-		}
 		RefreshPlayersList();
 		GBC.anchor = GridBagConstraints.CENTER;
 		GBC.fill = GridBagConstraints.BOTH;
@@ -449,7 +455,7 @@ public class GameFrame extends Frame {
 	}
 
 	private void LabelSetup() {
-		nRoundsLabel = new Label("NRounds = 0");
+		nRoundsLabel = new Label("NRounds: " + nRounds);
 		nRoundsLabel.setForeground(labelColor);
 		nRoundsLabel.setAlignment(Label.CENTER);
 		GBC.anchor = GridBagConstraints.CENTER;
@@ -590,15 +596,15 @@ public class GameFrame extends Frame {
 		nRoundsLabel.setText("NRounds = " + rounds);
 	}
 
-	public void RefreshLog(boolean active, LogLevel logLevel) {
+	public void RefreshLog(boolean active, psi27_LogMessage.LogLevel logLevel) {
 		logList.removeAll();
 		logActivated = active;
 		activeLogLevel = logLevel;
 		if (!logActivated) {
 			return;
 		}
-		for (LogMessage lm : messageList) {
-			if (logLevel == LogLevel.DETAILED) {
+		for (psi27_LogMessage lm : messageList) {
+			if (logLevel == psi27_LogMessage.LogLevel.DETAILED) {
 				logList.add(lm.message);
 			} else {
 				if (logLevel == lm.myLogLevel) {
@@ -609,7 +615,7 @@ public class GameFrame extends Frame {
 	}
 
 	public void ChangeMatrixDimension(int dimension) {
-		gameMatrix = new GameMatrix(dimension);
+		gameMatrix = new psi27_GameMatrix(dimension);
 		matrixArea.setText(gameMatrix.ToString());
 	}
 
@@ -620,7 +626,7 @@ public class GameFrame extends Frame {
 			return;
 		}
 		String message = "Player: " + playersInfoList.get(index).name + " removed";
-		AddMessageToLog(message);
+		AddMessageToLog(message, null);
 		playersInfoList.remove(index);
 		playersList.remove(index);
 		nPlayers--;
@@ -641,7 +647,7 @@ public class GameFrame extends Frame {
 	public void RefreshPlayersList() {
 		playersList.removeAll();
 		playersList.add("Tipo    Nombre Id G P Parcial Total");
-		for (PlayerInfo pI : playersInfoList) {
+		for (psi27_PlayerInfo pI : playersInfoList) {
 			playersList.add(pI.ToString());
 		}
 	}
@@ -649,25 +655,24 @@ public class GameFrame extends Frame {
 	public void RenameSelectedPlayer(String name) {
 		int index = GetSelectedPlayer();
 		String message = playersInfoList.get(index).name + " name changed to: " + name;
-		AddMessageToLog(message);
+		AddMessageToLog(message, null);
 		playersInfoList.get(index).name = name;
 		RefreshPlayersList();
 	}
 
-	public void AddMessageToLog(String message) {
-		LogMessage lm = new LogMessage(message, LogLevel.INFO);
+	public void AddMessageToLog(String message, psi27_LogMessage.LogLevel level) {
+		psi27_LogMessage.LogLevel logLevel = (level == null) ? psi27_LogMessage.LogLevel.INFO : level;
+		psi27_LogMessage lm = new psi27_LogMessage(message, logLevel);
 		messageList.add(lm);
 		RefreshLog(logActivated, activeLogLevel);
 	}
 
 	public void ResetPlayers() {
-		ArrayList<PlayerInfo> temp = new ArrayList<PlayerInfo>();
-		for (PlayerInfo pi : playersInfoList) {
-			PlayerInfo piTemp = new PlayerInfo(pi.name, pi.id);
-			temp.add(piTemp);
+		for (int i = 0; i < playersInfoList.size(); i++) {
+			psi27_PlayerInfo info = playersInfoList.get(i);
+			info.p = info.g = info.partial = info.total = 0;
 		}
-		playersInfoList = temp;
-		AddMessageToLog("Players have been reset");
+		AddMessageToLog("Players have been reset", null);
 		RefreshPlayersList();
 	}
 
@@ -677,5 +682,30 @@ public class GameFrame extends Frame {
 
 	public void ChangeDelay(int delay) {
 		this.delay = delay;
+	}
+
+	public void NewGame() {
+		/*
+		 * Platform.runLater(new Thread() { public void run() { referee.Game();
+		 * } });
+		 */
+		referee.Game();
+	}
+
+	public void RefreshMatchGUI(int player1WonRounds, int player2WonRounds, int payoffPlayer1, int payoffPlayer2,
+			int totalRounds) {
+		psi27_PlayerInfo player1 = referee.GetInfoWithId(referee.currentPlayerId);
+		psi27_PlayerInfo player2 = referee.GetInfoWithId(referee.currentSecondPlayerId);
+		statisticsTitle.setText(player1.name + " vs " + player2.name);
+		int player1LostRounds = totalRounds - player1WonRounds;
+		int player2LostRounds = totalRounds - player2WonRounds;
+
+		this.winRoundsPlayer1.setText(player1WonRounds + "");
+		this.lostRoundsPlayer1.setText(player1LostRounds + "");
+		this.payoffPlayer1.setText(payoffPlayer1 + "");
+
+		this.winRoundsPlayer2.setText(player2WonRounds + "");
+		this.lostRoundsPlayer2.setText(player2LostRounds + "");
+		this.payoffPlayer2.setText(payoffPlayer2 + "");
 	}
 }

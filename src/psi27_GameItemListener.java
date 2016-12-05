@@ -1,20 +1,17 @@
-package window;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import window.LogMessage.LogLevel;
-
-public class GameItemListener implements ItemListener {
-	protected GameFrame gF;
+public class psi27_GameItemListener implements ItemListener {
+	protected psi27_GameFrame gF;
 	protected boolean logActivated = true;
-	protected LogLevel logLevel = LogLevel.INFO;
+	protected psi27_LogMessage.LogLevel logLevel = psi27_LogMessage.LogLevel.INFO;
 
-	public GameItemListener() {
+	public psi27_GameItemListener() {
 
 	}
 
-	public GameItemListener(GameFrame gF) {
+	public psi27_GameItemListener(psi27_GameFrame gF) {
 		this.gF = gF;
 	}
 
@@ -28,7 +25,7 @@ public class GameItemListener implements ItemListener {
 			gF.RefreshLog(logActivated, logLevel);
 			break;
 		case "Log Detallado":
-			logLevel = (selected) ? LogLevel.DETAILED : LogLevel.INFO;
+			logLevel = (selected) ? psi27_LogMessage.LogLevel.DETAILED : psi27_LogMessage.LogLevel.INFO;
 			gF.RefreshLog(logActivated, logLevel);
 			break;
 		}
