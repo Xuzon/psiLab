@@ -7,7 +7,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 
-public abstract class Player extends Agent {
+public abstract class psi27_Player extends Agent {
 
 	private static final long serialVersionUID = 1L;
 	public int id;
@@ -20,7 +20,7 @@ public abstract class Player extends Agent {
 	protected int currentRoundPayoff = 0;
 	protected int totalPayoff = 0;
 
-	public Player() {
+	public psi27_Player() {
 	}
 
 	protected void setup() {
@@ -49,6 +49,10 @@ public abstract class Player extends Agent {
 
 	protected abstract int PlayGame();
 
+	protected abstract void ChangedMatrix(int percentage);
+
+	protected abstract void Results(String message);
+
 	protected class MessageListener extends CyclicBehaviour {
 		public void action() {
 			ProcessMessage();
@@ -73,7 +77,7 @@ public abstract class Player extends Agent {
 		}
 
 		protected void GetGameInfo(String[] splittedMessage) {
-			Player player = (Player) myAgent;
+			psi27_Player player = (psi27_Player) myAgent;
 			player.id = Integer.parseInt(splittedMessage[1]);
 			String[] temp = splittedMessage[2].split(",");
 			totalPlayers = Integer.parseInt(temp[0]);
@@ -84,7 +88,7 @@ public abstract class Player extends Agent {
 		}
 
 		protected void SetNewGame(String[] splittedMessage) {
-			Player player = (Player) myAgent;
+			psi27_Player player = (psi27_Player) myAgent;
 			String[] temp = splittedMessage[1].split(",");
 			int firstId = Integer.parseInt(temp[0]);
 			int secondId = Integer.parseInt(temp[1]);
@@ -98,7 +102,7 @@ public abstract class Player extends Agent {
 
 		@Override
 		public void action() {
-			Player player = (Player) myAgent;
+			psi27_Player player = (psi27_Player) myAgent;
 			while (true) {
 				ACLMessage msg = myAgent.receive();
 				if (msg != null) {
@@ -114,10 +118,11 @@ public abstract class Player extends Agent {
 						send(reply);
 						break;
 					case "Changed":
-						// TODO
+						int changed = Integer.parseInt(splittedMessage[1]);
+						player.ChangedMatrix(changed);
 						break;
 					case "Results":
-						// TODO
+						player.Results(splittedMessage[1]);
 						break;
 					default:
 						break;

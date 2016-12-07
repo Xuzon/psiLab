@@ -78,7 +78,7 @@ public class psi27_GameFrame extends Frame {
 
 	protected psi27_GameMatrix gameMatrix;
 
-	protected Referee referee;
+	protected psi27_Referee referee;
 
 	public psi27_GameFrame() {
 	}
@@ -98,7 +98,7 @@ public class psi27_GameFrame extends Frame {
 		ActivateWindow(title, rect);
 	}
 
-	public psi27_GameFrame(int width, int height, String title, Referee referee) {
+	public psi27_GameFrame(int width, int height, String title, psi27_Referee referee) {
 		this.width = width;
 		this.height = height;
 		this.title = title;
@@ -469,7 +469,7 @@ public class psi27_GameFrame extends Frame {
 		this.add(nRoundsLabel, GBC);
 		GBC = new GridBagConstraints();
 
-		nGamesLabel = new Label("NGames = 0");
+		nGamesLabel = new Label("NGames: 0");
 		nGamesLabel.setForeground(labelColor);
 		nGamesLabel.setAlignment(Label.CENTER);
 		GBC.anchor = GridBagConstraints.CENTER;
@@ -539,6 +539,9 @@ public class psi27_GameFrame extends Frame {
 		oMI = new MenuItem("Cambia Matriz cada...");
 		oMI.addActionListener(gActionListener);
 		oMenu.add(oMI);
+		oMI = new MenuItem("Cambiar porcentaje");
+		oMI.addActionListener(gActionListener);
+		oMenu.add(oMI);
 		oMI = new MenuItem("Cambia Retardo");
 		oMI.addActionListener(gActionListener);
 		oMenu.add(oMI);
@@ -597,9 +600,16 @@ public class psi27_GameFrame extends Frame {
 	}
 
 	public void RefreshLog(boolean active, psi27_LogMessage.LogLevel logLevel) {
-		logList.removeAll();
+		// only refresh if the last message would update the shown list and it
+		// is active
+		psi27_LogMessage msg = (messageList.size() > 0) ? messageList.get(messageList.size() - 1) : null;
 		logActivated = active;
 		activeLogLevel = logLevel;
+		if (!(msg != null && logLevel == msg.myLogLevel && active)) {
+			return;
+		}
+		logList.removeAll();
+
 		if (!logActivated) {
 			return;
 		}
@@ -684,11 +694,11 @@ public class psi27_GameFrame extends Frame {
 		this.delay = delay;
 	}
 
+	public void ChangePercentage(int percentage) {
+		this.matrixChangePercentage = percentage;
+	}
+
 	public void NewGame() {
-		/*
-		 * Platform.runLater(new Thread() { public void run() { referee.Game();
-		 * } });
-		 */
 		referee.Game();
 	}
 

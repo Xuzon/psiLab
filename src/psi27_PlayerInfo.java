@@ -28,4 +28,21 @@ public class psi27_PlayerInfo {
 				+ total;
 		return toRet;
 	}
+
+	public int CompareTo(psi27_PlayerInfo arg0) {
+		int gamesWon = arg0.g - this.g;
+		int gamesLost = this.p - arg0.p;
+		int payOff = arg0.total - this.total;
+		if (gamesWon != 0) {
+			return gamesWon;
+		}
+		if (gamesLost != 0) {
+			return gamesLost;
+		}
+
+		if (payOff != 0) {
+			return payOff;
+		}
+		return 0;
+	}
 }

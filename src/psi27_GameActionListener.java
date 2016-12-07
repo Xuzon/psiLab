@@ -30,6 +30,9 @@ public class psi27_GameActionListener implements ActionListener {
 		case "Cambia Matriz cada...":
 			ChangeTurns();
 			break;
+		case "Cambiar porcentaje":
+			ChangePercentage();
+			break;
 		case "Cambia Retardo":
 			ChangeDelay();
 			break;
@@ -70,7 +73,14 @@ public class psi27_GameActionListener implements ActionListener {
 		// JOptionPane.showMessageDialog(gF, message, "New game",
 		// JOptionPane.INFORMATION_MESSAGE);
 		gF.AddMessageToLog(message, null);
-		gF.NewGame();
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				gF.NewGame();
+			}
+		};
+		(new Thread(runnable)).start();
+		;
 	}
 
 	private void ChangeRounds() {
@@ -119,6 +129,24 @@ public class psi27_GameActionListener implements ActionListener {
 				JOptionPane.showMessageDialog(gF, "Turnos cambiados a: " + iTurns, "About",
 						JOptionPane.INFORMATION_MESSAGE);
 				gF.ChangeTurnsMatrixChange(iTurns);
+			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(gF, "Introduzca un número", "ERROR", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private void ChangePercentage() {
+		String question = "Introduzca porcentaje de cambio de matriz";
+		String percentage = JOptionPane.showInputDialog(gF, question, "10");
+		try {
+			int iPercentage = Integer.parseInt(percentage);
+			if (iPercentage < 0 || iPercentage > 100) {
+				JOptionPane.showMessageDialog(gF, "Introduzca un número entre 0 y 100", "ERROR",
+						JOptionPane.ERROR_MESSAGE);
+			} else {
+				JOptionPane.showMessageDialog(gF, "Porcentaje cambiado a: " + iPercentage, "About",
+						JOptionPane.INFORMATION_MESSAGE);
+				gF.ChangePercentage(iPercentage);
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(gF, "Introduzca un número", "ERROR", JOptionPane.ERROR_MESSAGE);
