@@ -1,5 +1,4 @@
 
-
 import java.awt.Color;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -27,6 +26,7 @@ public class psi27_GameWindowListener implements WindowListener {
 	@Override
 	public void windowClosing(WindowEvent arg0) {
 		gF.dispose();
+		System.exit(0);
 	}
 
 	@Override

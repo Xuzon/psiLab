@@ -4,6 +4,7 @@ public class psi27_RandomPlayer extends psi27_Player {
 
 	@Override
 	public void setup() {
+		type = "Random";
 		super.setup();
 	}
 

@@ -11,6 +11,7 @@ public abstract class psi27_Player extends Agent {
 
 	private static final long serialVersionUID = 1L;
 	public int id;
+	protected String type = "";
 	protected int enemyId;
 	protected int totalPlayers = 0;
 	protected int matrixDimension = 0;
@@ -35,10 +36,15 @@ public abstract class psi27_Player extends Agent {
 		agentDescription.addLanguages("English");
 
 		ServiceDescription service = new ServiceDescription();
-		service.setType("PLAYER");
+		service.setType("Player");
 		service.setName(this.getAID().getName());
 
+		ServiceDescription myTypeService = new ServiceDescription();
+		myTypeService.setType(type);
+		myTypeService.setName(this.getAID().getName());
+
 		agentDescription.addServices(service);
+		agentDescription.addServices(myTypeService);
 
 		try {
 			DFService.register(this, agentDescription);
@@ -53,6 +59,7 @@ public abstract class psi27_Player extends Agent {
 
 	protected abstract void Results(String message);
 
+	// Normal behaviour (get the new match and new game message)
 	protected class MessageListener extends CyclicBehaviour {
 		public void action() {
 			ProcessMessage();
@@ -65,10 +72,10 @@ public abstract class psi27_Player extends Agent {
 				String[] splittedMessage = text.split("#");
 				switch (splittedMessage[0]) {
 				case "Id":
-					GetGameInfo(splittedMessage);
+					NewGame(splittedMessage);
 					break;
 				case "NewGame":
-					SetNewGame(splittedMessage);
+					NewMatch(splittedMessage);
 					break;
 				default:
 					break;
@@ -76,7 +83,7 @@ public abstract class psi27_Player extends Agent {
 			}
 		}
 
-		protected void GetGameInfo(String[] splittedMessage) {
+		protected void NewGame(String[] splittedMessage) {
 			psi27_Player player = (psi27_Player) myAgent;
 			player.id = Integer.parseInt(splittedMessage[1]);
 			String[] temp = splittedMessage[2].split(",");
@@ -87,7 +94,7 @@ public abstract class psi27_Player extends Agent {
 			matrixChangePercentage = Integer.parseInt(temp[4]);
 		}
 
-		protected void SetNewGame(String[] splittedMessage) {
+		protected void NewMatch(String[] splittedMessage) {
 			psi27_Player player = (psi27_Player) myAgent;
 			String[] temp = splittedMessage[1].split(",");
 			int firstId = Integer.parseInt(temp[0]);
@@ -98,6 +105,7 @@ public abstract class psi27_Player extends Agent {
 		}
 	}
 
+	// Behaviour that is active only when playing a match
 	protected class PlayBehaviour extends SimpleBehaviour {
 
 		@Override
@@ -113,8 +121,10 @@ public abstract class psi27_Player extends Agent {
 						return;
 					case "Position":
 						int pos = player.PlayGame();
-						ACLMessage reply = msg.createReply();
+						ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
 						reply.setContent("Position#" + pos);
+						reply.setSender(getAID());
+						reply.addReceiver(msg.getSender());
 						send(reply);
 						break;
 					case "Changed":

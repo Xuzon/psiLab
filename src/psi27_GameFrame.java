@@ -600,28 +600,37 @@ public class psi27_GameFrame extends Frame {
 	}
 
 	public void RefreshLog(boolean active, psi27_LogMessage.LogLevel logLevel) {
-		// only refresh if the last message would update the shown list and it
-		// is active
+		// Get the last message
 		psi27_LogMessage msg = (messageList.size() > 0) ? messageList.get(messageList.size() - 1) : null;
+		if (!active || logLevel != activeLogLevel) {
+			// if is not active or change the logLevel remove to update the log
+			System.out.println("REMOVING LIST");
+			logList.removeAll();
+		}
 		logActivated = active;
-		activeLogLevel = logLevel;
-		if (!(msg != null && logLevel == msg.myLogLevel && active)) {
-			return;
-		}
-		logList.removeAll();
-
 		if (!logActivated) {
+			// if not active then return with the empty list
+			activeLogLevel = logLevel;
 			return;
 		}
-		for (psi27_LogMessage lm : messageList) {
-			if (logLevel == psi27_LogMessage.LogLevel.DETAILED) {
-				logList.add(lm.message);
-			} else {
-				if (logLevel == lm.myLogLevel) {
+		if (logLevel != activeLogLevel) {
+			// if the log level has changed update all the list
+			for (psi27_LogMessage lm : messageList) {
+				if (logLevel == psi27_LogMessage.LogLevel.DETAILED) {
 					logList.add(lm.message);
+				} else {
+					if (logLevel == lm.myLogLevel) {
+						logList.add(lm.message);
+					}
 				}
 			}
+		} else {
+			// if is the same log level just add the last message
+			if (msg != null && msg.myLogLevel == activeLogLevel) {
+				logList.add(msg.message);
+			}
 		}
+		activeLogLevel = logLevel;
 	}
 
 	public void ChangeMatrixDimension(int dimension) {

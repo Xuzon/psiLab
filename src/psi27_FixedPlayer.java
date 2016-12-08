@@ -1,6 +1,12 @@
 public class psi27_FixedPlayer extends psi27_Player {
 
 	@Override
+	public void setup() {
+		type = "Fixed";
+		super.setup();
+	}
+
+	@Override
 	protected int PlayGame() {
 		return 0;
 	}

@@ -19,6 +19,22 @@ public class psi27_GameActionListener implements ActionListener {
 	public void actionPerformed(ActionEvent event) {
 		String command = event.getActionCommand();
 		System.out.println(command);
+		// Can'tt do changes if a game is running only stop and resume game or
+		// exit
+		switch (command) {
+		case "Stop":
+			PauseGame();
+			break;
+		case "Resume":
+			ResumeGame();
+			break;
+		case "Salir":
+			System.exit(0);
+			break;
+		}
+		if (gF.referee != null && gF.referee.gameRunning) {
+			return;
+		}
 		switch (command) {
 		case "About":
 			String aboutMessage = "Game 1.0 \n Carlos Daniel Garrido Suárez";
@@ -52,17 +68,9 @@ public class psi27_GameActionListener implements ActionListener {
 		case "Nueva Partida":
 			NewGame();
 			break;
-		case "Salir":
-			System.exit(0);
-			break;
+
 		case "New Game":
 			NewGame();
-			break;
-		case "Stop":
-			PauseGame();
-			break;
-		case "Resume":
-			ResumeGame();
 			break;
 		}
 
