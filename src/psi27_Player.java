@@ -33,7 +33,7 @@ public abstract class psi27_Player extends Agent {
 	protected void RegisterDf() {
 		DFAgentDescription agentDescription = new DFAgentDescription();
 		agentDescription.setName(getAID());
-		agentDescription.addLanguages("English");
+		// agentDescription.addLanguages("English");
 
 		ServiceDescription service = new ServiceDescription();
 		service.setType("Player");

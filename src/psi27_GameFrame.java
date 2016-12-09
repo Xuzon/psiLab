@@ -78,7 +78,7 @@ public class psi27_GameFrame extends Frame {
 
 	protected psi27_GameMatrix gameMatrix;
 
-	protected psi27_Referee referee;
+	protected psi27_MainAg referee;
 
 	public psi27_GameFrame() {
 	}
@@ -98,7 +98,7 @@ public class psi27_GameFrame extends Frame {
 		ActivateWindow(title, rect);
 	}
 
-	public psi27_GameFrame(int width, int height, String title, psi27_Referee referee) {
+	public psi27_GameFrame(int width, int height, String title, psi27_MainAg referee) {
 		this.width = width;
 		this.height = height;
 		this.title = title;

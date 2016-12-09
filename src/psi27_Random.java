@@ -1,6 +1,6 @@
 import java.util.Random;
 
-public class psi27_RandomPlayer extends psi27_Player {
+public class psi27_Random extends psi27_Player {
 
 	@Override
 	public void setup() {

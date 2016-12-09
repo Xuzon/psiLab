@@ -1,4 +1,4 @@
-public class psi27_FixedPlayer extends psi27_Player {
+public class psi27_Fixed extends psi27_Player {
 
 	@Override
 	public void setup() {

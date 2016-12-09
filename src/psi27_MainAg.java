@@ -12,7 +12,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 
-public class psi27_Referee extends Agent {
+public class psi27_MainAg extends Agent {
 	private static final long serialVersionUID = 1L;
 	protected psi27_GameFrame gameFrame;
 	protected static int ID = 0;
@@ -295,10 +295,11 @@ public class psi27_Referee extends Agent {
 			service.setType("Player");
 
 			DFAgentDescription description = new DFAgentDescription();
-			description.addLanguages("English");
+			// description.addLanguages("English");
 
 			description.addServices(service);
 			try {
+				boolean somethingAdded = false;
 				DFAgentDescription[] results = DFService.search(this.myAgent, description);
 
 				if (results.length == 0) {
@@ -308,8 +309,8 @@ public class psi27_Referee extends Agent {
 				// Iterate over the list
 				for (int i = 0; i < results.length; ++i) {
 					AID aid = results[i].getName();
-					if (this.myAgent instanceof psi27_Referee) {
-						psi27_Referee referee = (psi27_Referee) this.myAgent;
+					if (this.myAgent instanceof psi27_MainAg) {
+						psi27_MainAg referee = (psi27_MainAg) this.myAgent;
 						boolean found = false;
 						// make sure if the list contains it or not
 						for (psi27_PlayerInfo listAID : referee.gameFrame.playersInfoList) {
@@ -341,9 +342,18 @@ public class psi27_Referee extends Agent {
 							referee.gameFrame.nPlayers++;
 							referee.gameFrame.nPlayersLabel.setText("NPlayers: " + referee.gameFrame.nPlayers);
 							referee.gameFrame.AddMessageToLog("PLAYER ADDED::" + aid.getName(), null);
-							referee.gameFrame.RefreshPlayersList();
+							somethingAdded = true;
 						}
 					}
+				}
+				if (somethingAdded) {
+					java.awt.EventQueue.invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							((psi27_MainAg) myAgent).gameFrame.RefreshPlayersList();
+						}
+					});
+
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

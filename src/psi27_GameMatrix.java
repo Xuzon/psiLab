@@ -21,6 +21,7 @@ public class psi27_GameMatrix {
 			for (int j = i; j < n; j++) {
 				if (i == j) {
 					matrix[i][j] = new psi27_Vector2();
+					matrix[i][j].y = matrix[i][j].x;
 				} else {
 					psi27_Vector2 v = new psi27_Vector2();
 					matrix[i][j] = v;
@@ -47,6 +48,9 @@ public class psi27_GameMatrix {
 			if (posToChange.x != posToChange.y) {
 				// only for simetric purposes
 				matrix[posToChange.y][posToChange.x] = new psi27_Vector2(newPayoff.y, newPayoff.x);
+			} else {
+				newPayoff.y = newPayoff.x;
+				matrix[posToChange.x][posToChange.y] = newPayoff;
 			}
 		}
 	}
