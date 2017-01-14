@@ -71,6 +71,10 @@ public class psi27_GameMatrix {
 		return matrix[x][y];
 	}
 
+	public psi27_Vector2 GetPosition(psi27_Vector2 pos) {
+		return GetPosition(pos.x, pos.y);
+	}
+
 	public String ToString() {
 		String toRet = "MATRIX \n";
 		for (int i = 0; i < dimension; i++) {
