@@ -7,12 +7,21 @@ public class psi27_GameMatrix {
 
 	public psi27_GameMatrix() {
 		matrix = new psi27_Vector2[5][5];
+		dimension = 5;
 		FillMatrix(5);
 	}
 
 	public psi27_GameMatrix(int n) {
 		dimension = n;
 		FillMatrix(n);
+	}
+
+	public void SetUnknown() {
+		for (int i = 0; i < dimension; i++) {
+			for (int j = 0; j < dimension; j++) {
+				matrix[i][j] = new psi27_Vector2(-1, -1);
+			}
+		}
 	}
 
 	private void FillMatrix(int n) {
@@ -45,14 +54,21 @@ public class psi27_GameMatrix {
 			percentageChanged += (posToChange.x == posToChange.y) ? percentageEach : percentageEach * 2;
 			psi27_Vector2 newPayoff = new psi27_Vector2();
 			matrix[posToChange.x][posToChange.y] = newPayoff;
-			if (posToChange.x != posToChange.y) {
-				// only for simetric purposes
-				matrix[posToChange.y][posToChange.x] = new psi27_Vector2(newPayoff.y, newPayoff.x);
-			} else {
-				newPayoff.y = newPayoff.x;
-				matrix[posToChange.x][posToChange.y] = newPayoff;
-			}
+			ChangePosition(posToChange.x, posToChange.y, newPayoff);
 		}
+	}
+
+	public void ChangePosition(int x, int y, psi27_Vector2 payoff) {
+		matrix[x][y] = payoff;
+		if (x != y) {
+			matrix[y][x] = new psi27_Vector2(payoff.y, payoff.x);
+		} else {
+			payoff.y = payoff.x;
+		}
+	}
+
+	public psi27_Vector2 GetPosition(int x, int y) {
+		return matrix[x][y];
 	}
 
 	public String ToString() {

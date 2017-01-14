@@ -53,11 +53,13 @@ public abstract class psi27_Player extends Agent {
 		}
 	}
 
+	protected abstract void NewGame();
+
 	protected abstract int PlayGame();
 
 	protected abstract void ChangedMatrix(int percentage);
 
-	protected abstract void Results(String message);
+	protected abstract void Results(String positions, String payoff);
 
 	// Normal behaviour (get the new match and new game message)
 	protected class MessageListener extends CyclicBehaviour {
@@ -92,6 +94,7 @@ public abstract class psi27_Player extends Agent {
 			nRounds = Integer.parseInt(temp[2]);
 			matrixTurnsChange = Integer.parseInt(temp[3]);
 			matrixChangePercentage = Integer.parseInt(temp[4]);
+			player.NewGame();
 		}
 
 		protected void NewMatch(String[] splittedMessage) {
@@ -132,7 +135,7 @@ public abstract class psi27_Player extends Agent {
 						player.ChangedMatrix(changed);
 						break;
 					case "Results":
-						player.Results(splittedMessage[1]);
+						player.Results(splittedMessage[1], splittedMessage[2]);
 						break;
 					default:
 						break;
