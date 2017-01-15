@@ -145,7 +145,8 @@ public class psi27_MainAg extends Agent {
 		int totalPayoffFirst = 0;
 		int totalPayoffSecond = 0;
 		String log = "";
-		for (int k = 0; k < gameFrame.nRounds; k++) {
+		int turnsPassed = 0;
+		for (int k = 0; k < gameFrame.nRounds; k++, turnsPassed++) {
 			// Paused active waiting
 			while (isPaused) {
 				try {
@@ -188,7 +189,8 @@ public class psi27_MainAg extends Agent {
 			}
 
 			// Change the game matrix
-			if (gameFrame.matrixChangePercentage > 0 && k > gameFrame.matrixTurnsChange) {
+			if (gameFrame.matrixChangePercentage > 0 && turnsPassed > gameFrame.matrixTurnsChange) {
+				turnsPassed = 0;
 				float percent = gameFrame.matrixChangePercentage;
 				gameFrame.gameMatrix.ChangeMatrix(percent);
 				try {

@@ -96,8 +96,8 @@ public class psi27_GameActionListener implements ActionListener {
 		String numPartidas = JOptionPane.showInputDialog(gF, question, "10");
 		try {
 			int iNumPartidas = Integer.parseInt(numPartidas);
-			if (iNumPartidas < 1 || iNumPartidas > 1000) {
-				JOptionPane.showMessageDialog(gF, "Introduzca un número entre 1 y 1000", "ERROR",
+			if (iNumPartidas < 1 || iNumPartidas > 5000) {
+				JOptionPane.showMessageDialog(gF, "Introduzca un número entre 1 y 5000", "ERROR",
 						JOptionPane.ERROR_MESSAGE);
 			} else {
 				JOptionPane.showMessageDialog(gF, "Num partidas cambiadas a: " + iNumPartidas, "About",

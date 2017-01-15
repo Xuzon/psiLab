@@ -22,7 +22,7 @@ public class psi27_Fixed extends psi27_Player {
 	}
 
 	@Override
-	protected void NewGame() {
+	protected void NewMatch() {
 
 	}
 

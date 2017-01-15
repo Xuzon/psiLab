@@ -53,7 +53,7 @@ public abstract class psi27_Player extends Agent {
 		}
 	}
 
-	protected abstract void NewGame();
+	protected abstract void NewMatch();
 
 	protected abstract int PlayGame();
 
@@ -94,7 +94,6 @@ public abstract class psi27_Player extends Agent {
 			nRounds = Integer.parseInt(temp[2]);
 			matrixTurnsChange = Integer.parseInt(temp[3]);
 			matrixChangePercentage = Integer.parseInt(temp[4]);
-			player.NewGame();
 		}
 
 		protected void NewMatch(String[] splittedMessage) {
@@ -105,6 +104,7 @@ public abstract class psi27_Player extends Agent {
 			player.enemyId = (firstId == player.id) ? secondId : firstId;
 			player.addBehaviour(new PlayBehaviour());
 			player.removeBehaviour(this);
+			player.NewMatch();
 		}
 	}
 

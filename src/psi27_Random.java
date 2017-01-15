@@ -25,7 +25,7 @@ public class psi27_Random extends psi27_Player {
 	}
 
 	@Override
-	protected void NewGame() {
+	protected void NewMatch() {
 
 	}
 }

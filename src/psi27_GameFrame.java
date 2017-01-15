@@ -49,12 +49,12 @@ public class psi27_GameFrame extends Frame {
 	protected Button stopGameButton;
 	protected Button resumeGameButton;
 	protected Label nRoundsLabel;
-	protected int nRounds = 100;
+	protected int nRounds = 1000;
 	protected Label nPlayersLabel;
 	protected int nPlayers;
 	protected Label nGamesLabel;
 	protected int nGames;
-	protected int matrixTurnsChange = 10;
+	protected int matrixTurnsChange = 100;
 	protected float matrixChangePercentage = 10;
 	protected int delay = 5;
 
