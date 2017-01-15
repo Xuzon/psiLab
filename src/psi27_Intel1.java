@@ -172,7 +172,13 @@ public class psi27_Intel1 extends psi27_Player {
 						// If I have the same value get by better average
 						// movement
 						if (toRet == temp) {
-							toRet = GetBetterAverageMovement();
+							int avg = GetBetterAverageMovement();
+							if (avg == toRet) {
+								// If even this is the same movement choose
+								// another
+								// TODO
+								toRet = new Random().nextInt(matrixDimension);
+							}
 						}
 					}
 				}
