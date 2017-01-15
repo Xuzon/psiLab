@@ -18,6 +18,12 @@ public class psi27_Intel1 extends psi27_Player {
 	protected List<psi27_Vector2> positionsLog = new ArrayList<psi27_Vector2>();
 
 	@Override
+	public void setup() {
+		type = "Intel1";
+		super.setup();
+	}
+
+	@Override
 	protected void NewMatch() {
 		matrix = new psi27_GameMatrix(matrixDimension);
 		matrix.SetUnknown();
@@ -83,14 +89,13 @@ public class psi27_Intel1 extends psi27_Player {
 
 	protected int Strategy() {
 		int toRet = 0;
-		List<psi27_Vector2> paretoOptimal = GetParetoOptimal();
 		List<Integer> dominant = GetDominant();
 		List<psi27_Vector2> nashEquilibriums = GetNashEquilibrium();
-		toRet = Choice(paretoOptimal, dominant, nashEquilibriums);
+		toRet = Choice(dominant, nashEquilibriums);
 		return toRet;
 	}
 
-	protected int Choice(List<psi27_Vector2> pareto, List<Integer> dominant, List<psi27_Vector2> nash) {
+	protected int Choice(List<Integer> dominant, List<psi27_Vector2> nash) {
 		int toRet = 0;
 
 		int bestDominant = GetBetterDominant(dominant);
@@ -100,7 +105,21 @@ public class psi27_Intel1 extends psi27_Player {
 		// GET MAX MIN
 		List<Integer> maxMin = GetMaxMin();
 
-		toRet = GetStrategyBasedOnPast(pareto, nash, maxMin);
+		if (nash.size() == 0) {
+			// System.out.println("Nash is empty using max
+			// min");
+			return maxMin.get(new Random().nextInt(maxMin.size()));
+		}
+
+		// If I'm winning I want to minimize my loses but if I'm losing I want
+		// to maximize my profits trying to reach the other player
+		if (winning) {
+			toRet = maxMin.get(new Random().nextInt(maxMin.size()));
+		} else {
+			toRet = GetBetterAverageMovement();
+		}
+
+		toRet = GetStrategyBasedOnPast(toRet, maxMin);
 
 		return toRet;
 	}
@@ -121,6 +140,7 @@ public class psi27_Intel1 extends psi27_Player {
 				}
 			}
 			if (currMaxEnemyGain < maxEnemyGain) {
+				System.out.println("Choosing dominant strategy");
 				toRet = coord;
 				maxEnemyGain = currMaxEnemyGain;
 			}
@@ -128,22 +148,50 @@ public class psi27_Intel1 extends psi27_Player {
 		return toRet;
 	}
 
-	protected int GetStrategyBasedOnPast(List<psi27_Vector2> pareto, List<psi27_Vector2> nash, List<Integer> maxMin) {
-		int toRet = 0;
-		if (nash.size() == 0 && pareto.size() == 0) {
-			System.out.println("Pareto optimal and nash are empty using max min");
-			return maxMin.get(new Random().nextInt(maxMin.size()));
-		}
+	protected int GetStrategyBasedOnPast(int pos, List<Integer> maxMin) {
+		int toRet = pos;
 
-		// TODO
-		// If I'm winning I want to minimize my loses but if I'm losing I want
-		// to maximize my profits trying to reach the other player
-		if (winning) {
-			toRet = maxMin.get(new Random().nextInt(maxMin.size()));
-		} else {
-			toRet = GetBetterAverageMovement();
+		if (positionsLog.size() >= enemyPlayingSameMove) {
+			psi27_Vector2 vec = positionsLog.get(positionsLog.size() - 1);
+			int lastEnemyPos = rowTurn ? vec.y : vec.x;
+			for (int i = 1; i < enemyPlayingSameMove; i++) {
+				vec = positionsLog.get(positionsLog.size() - 1 - i);
+				int enemyPos = rowTurn ? vec.y : vec.x;
+				if (enemyPos != lastEnemyPos) {
+					break;
+				}
+				if (i == enemyPlayingSameMove - 1) {
+					System.out.println("Enemy is playing same move for: " + enemyPlayingSameMove + " turns");
+					vec = rowTurn ? matrix.GetPosition(toRet, enemyPos) : matrix.GetPosition(enemyPos, toRet);
+					int myPay = rowTurn ? vec.x : vec.y;
+					int enPay = rowTurn ? vec.y : vec.x;
+					if (myPay <= enPay) {
+						// If I have less payoff don't choose that movement
+						System.out.println("choosing another strategy");
+						int temp = ChooseAnotherFromlist(maxMin, toRet);
+						// If I have the same value get by better average
+						// movement
+						if (toRet == temp) {
+							toRet = GetBetterAverageMovement();
+						}
+					}
+				}
+			}
 		}
+		return toRet;
+	}
 
+	private int ChooseAnotherFromlist(List<Integer> list, int value) {
+		int toRet = value;
+		if (list.size() > 1) {
+			for (int j = 0; j < list.size(); j++) {
+				int temp = list.get(j);
+				if (temp != value) {
+					toRet = temp;
+					break;
+				}
+			}
+		}
 		return toRet;
 	}
 
@@ -158,7 +206,7 @@ public class psi27_Intel1 extends psi27_Player {
 					if (k == i) {
 						continue;
 					}
-					psi27_Vector2 temp = matrix.GetPosition(k, j);
+					psi27_Vector2 temp = matrix.GetPosition(i, k);
 					if (temp.y > vec.y) {
 						break;
 					}
@@ -171,7 +219,7 @@ public class psi27_Intel1 extends psi27_Player {
 					if (k == j) {
 						continue;
 					}
-					psi27_Vector2 temp = matrix.GetPosition(i, k);
+					psi27_Vector2 temp = matrix.GetPosition(k, j);
 					if (temp.x > vec.x) {
 						break;
 					}
@@ -187,6 +235,10 @@ public class psi27_Intel1 extends psi27_Player {
 		return toRet;
 	}
 
+	/*
+	 * Get a list of possible MaxMin strategies, it gives you in int format
+	 * (movement)
+	 */
 	protected List<Integer> GetMaxMin() {
 		List<Integer> toRet = new ArrayList<Integer>();
 		int worstPayOff = 0;
@@ -236,26 +288,6 @@ public class psi27_Intel1 extends psi27_Player {
 		return toRet;
 	}
 
-	protected List<psi27_Vector2> GetParetoOptimal() {
-		List<psi27_Vector2> toRet = new ArrayList<psi27_Vector2>();
-		int xMax = 0;
-		int yMax = 0;
-		for (int i = 0; i < matrixDimension; i++) {
-			for (int j = 0; j < matrixDimension; j++) {
-				psi27_Vector2 vec = matrix.GetPosition(i, j);
-				psi27_Vector2 add = new psi27_Vector2(i, j);
-				// TODO CHECK
-				if (vec.x == xMax && vec.y == yMax) {
-					toRet.add(add);
-				}
-				if (vec.x > xMax || vec.y > yMax) {
-
-				}
-			}
-		}
-		return toRet;
-	}
-
 	protected List<Integer> GetDominant() {
 		List<Integer> toRet = new ArrayList<Integer>();
 
@@ -280,6 +312,7 @@ public class psi27_Intel1 extends psi27_Player {
 				}
 				boolean hasToBreak = false;
 				for (int k = 0; k < matrixDimension; k++) {
+					// TODO sometimes it goes til 5, is impossible
 					if (payoffs[i][k] < payoffs[j][k]) {
 						hasToBreak = true;
 						notDominant = true;

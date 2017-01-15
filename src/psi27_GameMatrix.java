@@ -67,8 +67,8 @@ public class psi27_GameMatrix {
 		}
 	}
 
-	public psi27_Vector2 GetPosition(int x, int y) {
-		return matrix[x][y];
+	public psi27_Vector2 GetPosition(int row, int column) {
+		return matrix[row][column];
 	}
 
 	public psi27_Vector2 GetPosition(psi27_Vector2 pos) {
