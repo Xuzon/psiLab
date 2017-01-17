@@ -9,6 +9,8 @@ public class psi27_Intel1 extends psi27_Player {
 	// *************************************
 	// **************FACTORS****************
 	protected int enemyPlayingSameMove = 4;
+	protected int INITIAL_SAME_MOVE = 4;
+	protected boolean checkEnemyPlayingSameMove = false;
 	// percentage that triggers my want to know movement (0-1)
 	protected float wantToKnowMovement = .7f;
 	// ******************************************
@@ -32,6 +34,7 @@ public class psi27_Intel1 extends psi27_Player {
 		myPayoff = 0;
 		enemyPayoff = 0;
 		positionsLog.clear();
+		enemyPlayingSameMove = INITIAL_SAME_MOVE;
 	}
 
 	@Override
@@ -51,6 +54,13 @@ public class psi27_Intel1 extends psi27_Player {
 
 	protected int DiscoverMatrix() {
 		int toRet = -1;
+
+		List<Integer> dominant = GetDominant();
+		if (dominant.size() > 0) {
+			// If now I have a movement where always win doesn't keep
+			// discovering matrix
+			return GetBetterDominant(dominant);
+		}
 		int[][] unknownPerMovement = new int[matrixDimension][1];
 		for (int i = 0; i < matrixDimension; i++) {
 			for (int j = 0; j < matrixDimension; j++) {
@@ -105,12 +115,7 @@ public class psi27_Intel1 extends psi27_Player {
 		// GET MAX MIN
 		List<Integer> maxMin = GetMaxMin();
 
-		if (nash.size() == 0) {
-			// System.out.println("Nash is empty using max
-			// min");
-			return maxMin.get(new Random().nextInt(maxMin.size()));
-		}
-
+		// TODO something with nash
 		// If I'm winning I want to minimize my loses but if I'm losing I want
 		// to maximize my profits trying to reach the other player
 		if (winning) {
@@ -121,30 +126,6 @@ public class psi27_Intel1 extends psi27_Player {
 
 		toRet = GetStrategyBasedOnPast(toRet, maxMin);
 
-		return toRet;
-	}
-
-	protected int GetBetterDominant(List<Integer> dominant) {
-		int toRet = -1;
-		// If I have some dominant strategies choose the one that harms the most
-		// to the enemy (minimize his max payoff)
-		int maxEnemyGain = 10;
-		for (int strategy = 0; strategy < dominant.size(); strategy++) {
-			int coord = dominant.get(strategy);
-			int currMaxEnemyGain = 0;
-			for (int i = 0; i < matrixDimension; i++) {
-				psi27_Vector2 vec = rowTurn ? matrix.GetPosition(i, coord) : matrix.GetPosition(coord, i);
-				int pay = rowTurn ? vec.y : vec.x;
-				if (pay > currMaxEnemyGain) {
-					currMaxEnemyGain = pay;
-				}
-			}
-			if (currMaxEnemyGain < maxEnemyGain) {
-				System.out.println("Choosing dominant strategy");
-				toRet = coord;
-				maxEnemyGain = currMaxEnemyGain;
-			}
-		}
 		return toRet;
 	}
 
@@ -162,28 +143,28 @@ public class psi27_Intel1 extends psi27_Player {
 				}
 				if (i == enemyPlayingSameMove - 1) {
 					System.out.println("Enemy is playing same move for: " + enemyPlayingSameMove + " turns");
-					vec = rowTurn ? matrix.GetPosition(toRet, enemyPos) : matrix.GetPosition(enemyPos, toRet);
-					int myPay = rowTurn ? vec.x : vec.y;
-					int enPay = rowTurn ? vec.y : vec.x;
-					if (myPay <= enPay) {
-						// If I have less payoff don't choose that movement
-						System.out.println("choosing another strategy");
-						int temp = ChooseAnotherFromlist(maxMin, toRet);
-						// If I have the same value get by better average
-						// movement
-						if (toRet == temp) {
-							int avg = GetBetterAverageMovement();
-							if (avg == toRet) {
-								// If even this is the same movement choose
-								// another
-								// TODO
-								toRet = new Random().nextInt(matrixDimension);
-							}
-						}
-					}
+					checkEnemyPlayingSameMove = true;
+					toRet = BetterResponse(enemyPos);
 				}
 			}
 		}
+		return toRet;
+	}
+
+	protected int BetterResponse(int enemy) {
+		int toRet = 0;
+		float payDiff = -10;
+		for (int j = 0; j < matrixDimension; j++) {
+			psi27_Vector2 vec = rowTurn ? matrix.GetPosition(j, enemy) : matrix.GetPosition(enemy, j);
+			int myPay = rowTurn ? vec.x : vec.y;
+			int enemyPay = rowTurn ? vec.y : vec.x;
+			int diff = myPay - enemyPay;
+			if (diff > payDiff) {
+				toRet = j;
+				payDiff = diff;
+			}
+		}
+		// System.out.println("Choosing best response diff: " + payDiff);
 		return toRet;
 	}
 
@@ -294,47 +275,61 @@ public class psi27_Intel1 extends psi27_Player {
 		return toRet;
 	}
 
+	// **********************DOMINANT*****************************************************************
+
 	protected List<Integer> GetDominant() {
 		List<Integer> toRet = new ArrayList<Integer>();
-
-		int[][] payoffs = new int[matrixDimension][matrixDimension];
-		// get payoff vectors
 		for (int i = 0; i < matrixDimension; i++) {
-			int[] currPayoffs = new int[matrixDimension];
-			// get payoffs of row / column
+			boolean toAdd = false;
 			for (int j = 0; j < matrixDimension; j++) {
 				psi27_Vector2 vec = rowTurn ? matrix.GetPosition(i, j) : matrix.GetPosition(j, i);
-				int pay = rowTurn ? vec.x : vec.y;
-				currPayoffs[j] = pay;
-			}
-			payoffs[i] = currPayoffs.clone();
-		}
-
-		for (int i = 0; i < matrixDimension; i++) {
-			boolean notDominant = false;
-			for (int j = 0; i < matrixDimension; j++) {
-				if (i == j) {
-					continue;
-				}
-				boolean hasToBreak = false;
-				for (int k = 0; k < matrixDimension; k++) {
-					// TODO sometimes it goes til 5, is impossible
-					if (payoffs[i][k] < payoffs[j][k]) {
-						hasToBreak = true;
-						notDominant = true;
-						break;
-					}
-				}
-				if (hasToBreak) {
+				int myPay = rowTurn ? vec.x : vec.y;
+				int enemyPay = rowTurn ? vec.y : vec.x;
+				if (enemyPay > myPay || myPay < 0) {
 					break;
 				}
+
+				if (j == matrixDimension - 1) {
+					toAdd = true;
+				}
 			}
-			if (!notDominant) {
+			if (toAdd) {
 				toRet.add(new Integer(i));
+			}
+		}
+		// if (toRet.size() > 0) {
+		// System.out.println("I found a movement where I always win");
+		// }
+		return toRet;
+	}
+
+	protected int GetBetterDominant(List<Integer> dominant) {
+		int toRet = -1;
+		// If I have some dominant strategies choose the one that harms the most
+		// to the enemy (maximize my difference)
+		int maxDiff = 0;
+		for (int strategy = 0; strategy < dominant.size(); strategy++) {
+			int coord = dominant.get(strategy);
+			int currMinDiff = 10;
+			for (int i = 0; i < matrixDimension; i++) {
+				psi27_Vector2 vec = rowTurn ? matrix.GetPosition(coord, i) : matrix.GetPosition(i, coord);
+				int myPay = rowTurn ? vec.x : vec.y;
+				int enemyPay = rowTurn ? vec.y : vec.x;
+				int diff = myPay - enemyPay;
+				if (diff < currMinDiff) {
+					currMinDiff = diff;
+				}
+			}
+			if (currMinDiff > maxDiff) {
+				// System.out.println("Choosing dominant strategy");
+				toRet = dominant.get(coord);
+				maxDiff = currMinDiff;
 			}
 		}
 		return toRet;
 	}
+
+	// ***********************MESSAGES**************************************************
 
 	@Override
 	protected void ChangedMatrix(int percentage) {
@@ -354,9 +349,21 @@ public class psi27_Intel1 extends psi27_Player {
 		myPayoff += rowTurn ? xPayoff : yPayoff;
 		enemyPayoff += rowTurn ? yPayoff : xPayoff;
 		psi27_Vector2 position = new psi27_Vector2(x, y);
-		positionsLog.add(position);
 		winning = myPayoff > enemyPayoff ? true : false;
 		matrix.ChangePosition(x, y, new psi27_Vector2(xPayoff, yPayoff));
+		// Learning of the past factor
+		if (checkEnemyPlayingSameMove) {
+			checkEnemyPlayingSameMove = false;
+			int enemyPos = rowTurn ? y : x;
+			psi27_Vector2 vec = positionsLog.get(positionsLog.size() - 1);
+			int lastEnemyPos = rowTurn ? vec.y : vec.x;
+			if (enemyPos != lastEnemyPos) {
+				// penalize because you failed in predict the next movement
+				System.out.println("LEARNING");
+				enemyPlayingSameMove++;
+			}
+		}
+		positionsLog.add(position);
 	}
 
 }
