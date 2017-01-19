@@ -10,6 +10,7 @@ public class psi27_Intel1 extends psi27_Player {
 	// **************FACTORS****************
 	protected int enemyPlayingSameMove = 4;
 	protected int INITIAL_SAME_MOVE = 4;
+	protected float percentageSetUnknown = 50;
 	protected boolean checkEnemyPlayingSameMove = false;
 	// percentage that triggers my want to know movement (0-1)
 	protected float wantToKnowMovement = .7f;
@@ -80,12 +81,28 @@ public class psi27_Intel1 extends psi27_Player {
 
 		}
 
-		// TODO not randomly
 		if (knowCandidates.size() > 0) {
-			toRet = knowCandidates.get(new Random().nextInt(knowCandidates.size()));
-			float percentage = (float) unknownPerMovement[toRet][0] / (float) matrixDimension;
 			turnsTillDiscovered++;
 			info = false;
+
+			int maxDiff = -10;
+			for (int strategy = 0; strategy < knowCandidates.size(); strategy++) {
+				int coord = knowCandidates.get(strategy);
+				int currMinDiff = 10;
+				for (int i = 0; i < matrixDimension; i++) {
+					psi27_Vector2 vec = rowTurn ? matrix.GetPosition(coord, i) : matrix.GetPosition(i, coord);
+					int myPay = rowTurn ? vec.x : vec.y;
+					int enemyPay = rowTurn ? vec.y : vec.x;
+					int diff = myPay - enemyPay;
+					if (diff < currMinDiff) {
+						currMinDiff = diff;
+					}
+				}
+				if (currMinDiff > maxDiff) { //
+					toRet = coord;
+					maxDiff = currMinDiff;
+				}
+			}
 		} else {
 			if (!info) {
 				// System.out.println("Already know matrix in " +
@@ -333,8 +350,9 @@ public class psi27_Intel1 extends psi27_Player {
 
 	@Override
 	protected void ChangedMatrix(int percentage) {
-		matrix.SetUnknown();
-		// TODO try to do it better
+		if (percentage > percentageSetUnknown) {
+			matrix.SetUnknown();
+		}
 	}
 
 	@Override
