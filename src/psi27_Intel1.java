@@ -13,7 +13,7 @@ public class psi27_Intel1 extends psi27_Player {
 	protected float percentageSetUnknown = 50;
 	protected boolean checkEnemyPlayingSameMove = false;
 	// percentage that triggers my want to know movement (0-1)
-	protected float wantToKnowMovement = .7f;
+	protected float wantToKnowMovement = 1f;
 	// ******************************************
 	protected boolean winning = false;
 	protected int myPayoff = 0;
@@ -28,6 +28,7 @@ public class psi27_Intel1 extends psi27_Player {
 
 	@Override
 	protected void NewMatch() {
+		// RESET VARIABLES
 		matrix = new psi27_GameMatrix(matrixDimension);
 		matrix.SetUnknown();
 		rowTurn = (id < enemyId) ? true : false;
@@ -40,28 +41,33 @@ public class psi27_Intel1 extends psi27_Player {
 
 	@Override
 	protected int PlayGame() {
+		// ACTUAL PLAY
 		int toRet = 0;
+		// Decide if we wan't to discover a new position
 		toRet = DiscoverMatrix();
-		// We want to discover a new position
-		if (toRet != -1) {
-			return toRet;
+		// We want don't want to discover a new position choose a strategy
+		if (toRet == -1) {
+			toRet = Strategy();
 		}
-		toRet = Strategy();
 		return toRet;
 	}
 
 	protected int turnsTillDiscovered = 0;
 	protected boolean info = false;
 
+	/*
+	 * DISCOVER THE MATRIX OR CHECK DOMINANT
+	 */
 	protected int DiscoverMatrix() {
 		int toRet = -1;
 
 		List<Integer> dominant = GetDominant();
 		if (dominant.size() > 0) {
-			// If now I have a movement where always win doesn't keep
+			// If now I have a movement where always win or draw doesn't keep
 			// discovering matrix
 			return GetBetterDominant(dominant);
 		}
+		// GET UNKNOWN PERCENTAGE OF EVERY MOVEMENT
 		int[][] unknownPerMovement = new int[matrixDimension][1];
 		for (int i = 0; i < matrixDimension; i++) {
 			for (int j = 0; j < matrixDimension; j++) {
@@ -71,7 +77,7 @@ public class psi27_Intel1 extends psi27_Player {
 				}
 			}
 		}
-
+		// PONDERATE THE PERCENTAGES TO DECIDE IF I'M INTERESTED INTO OR NOT
 		List<Integer> knowCandidates = new ArrayList<Integer>();
 		for (int i = 0; i < matrixDimension; i++) {
 			float percentage = (float) unknownPerMovement[i][0] / (float) matrixDimension;
@@ -80,11 +86,11 @@ public class psi27_Intel1 extends psi27_Player {
 			}
 
 		}
-
+		// IF I WANT TO KNOW ONE
 		if (knowCandidates.size() > 0) {
 			turnsTillDiscovered++;
 			info = false;
-
+			// TRY TO DECIDE A GOOD MOVEMENT TO KNOW (HAVE MORE PAYOFF)
 			int maxDiff = -10;
 			for (int strategy = 0; strategy < knowCandidates.size(); strategy++) {
 				int coord = knowCandidates.get(strategy);
@@ -104,12 +110,7 @@ public class psi27_Intel1 extends psi27_Player {
 				}
 			}
 		} else {
-			if (!info) {
-				// System.out.println("Already know matrix in " +
-				// turnsTillDiscovered);
-				info = true;
-				turnsTillDiscovered = 0;
-			}
+			turnsTillDiscovered = 0;
 		}
 		return toRet;
 	}
@@ -122,9 +123,13 @@ public class psi27_Intel1 extends psi27_Player {
 		return toRet;
 	}
 
+	/*
+	 * MAKES THE ACTUAL CHOICE FOR DOMINANT, A MAX MIN, MOST WINNER AND PAST
+	 */
 	protected int Choice(List<Integer> dominant, List<psi27_Vector2> nash) {
 		int toRet = 0;
 
+		// IF I HAVE A "DOMINANT" OR MORE CHOOSE THE BEST
 		int bestDominant = GetBetterDominant(dominant);
 		if (bestDominant != -1) {
 			return bestDominant;
@@ -138,14 +143,17 @@ public class psi27_Intel1 extends psi27_Player {
 		if (winning) {
 			toRet = maxMin.get(new Random().nextInt(maxMin.size()));
 		} else {
-			toRet = GetBetterAverageMovement();
+			toRet = GetMostWinnerMove();
 		}
-
+		// DECIDE IF I'M MAKING A GOOD CHOICE SEEING THE PAST
 		toRet = GetStrategyBasedOnPast(toRet, maxMin);
 
 		return toRet;
 	}
 
+	/*
+	 * SEE THE PAST AND DECIDE A BETTER RESPONSE FOR THAT
+	 */
 	protected int GetStrategyBasedOnPast(int pos, List<Integer> maxMin) {
 		int toRet = pos;
 
@@ -168,6 +176,9 @@ public class psi27_Intel1 extends psi27_Player {
 		return toRet;
 	}
 
+	/*
+	 * GET THE BETTER RESPONSE FOR AN ENEMY STRATEGY
+	 */
 	protected int BetterResponse(int enemy) {
 		int toRet = 0;
 		float payDiff = -10;
@@ -185,20 +196,9 @@ public class psi27_Intel1 extends psi27_Player {
 		return toRet;
 	}
 
-	private int ChooseAnotherFromlist(List<Integer> list, int value) {
-		int toRet = value;
-		if (list.size() > 1) {
-			for (int j = 0; j < list.size(); j++) {
-				int temp = list.get(j);
-				if (temp != value) {
-					toRet = temp;
-					break;
-				}
-			}
-		}
-		return toRet;
-	}
-
+	/*
+	 * GET A LIST OF THE NASH EQUILIBRIUMS OF THE GAME
+	 */
 	protected List<psi27_Vector2> GetNashEquilibrium() {
 		List<psi27_Vector2> toRet = new ArrayList<psi27_Vector2>();
 		for (int i = 0; i < matrixDimension; i++) {
@@ -244,6 +244,7 @@ public class psi27_Intel1 extends psi27_Player {
 	 * (movement)
 	 */
 	protected List<Integer> GetMaxMin() {
+		// MINIMIZE MY WORST PAYOFF
 		List<Integer> toRet = new ArrayList<Integer>();
 		int worstPayOff = 0;
 		for (int i = 0; i < matrixDimension; i++) {
@@ -268,6 +269,34 @@ public class psi27_Intel1 extends psi27_Player {
 		return toRet;
 	}
 
+	/*
+	 * GET THE MOVEMENT WHERE I WIN OR DRAW MOST
+	 */
+	protected int GetMostWinnerMove() {
+		int toRet = 0;
+		float maxWins = 0;
+		for (int i = 0; i < matrixDimension; i++) {
+			float iteration = 0;
+			for (int j = 0; j < matrixDimension; j++) {
+				psi27_Vector2 vec = rowTurn ? matrix.GetPosition(i, j) : matrix.GetPosition(j, i);
+				int pay = rowTurn ? vec.x : vec.y;
+				int enPay = rowTurn ? vec.y : vec.x;
+				if (pay >= enPay) {
+					iteration++;
+				}
+			}
+			if (iteration > maxWins) {
+				toRet = i;
+				maxWins = iteration;
+			}
+		}
+
+		return toRet;
+	}
+
+	/*
+	 * GET THE MOVEMENT WHERE I HAVE THE BEST AVERAGE
+	 */
 	protected int GetBetterAverageMovement() {
 		int toRet = 0;
 		float maxAverage = 0;
@@ -293,7 +322,10 @@ public class psi27_Intel1 extends psi27_Player {
 	}
 
 	// **********************DOMINANT*****************************************************************
-
+	/*
+	 * RETURN A LIST OF POSSIBLE DOMINANTS MY DEF OF DOMINANT IS A MOVEMENT
+	 * WHERE YOU ALWAYS WIN OR DRAW WITH THE ENEMY
+	 */
 	protected List<Integer> GetDominant() {
 		List<Integer> toRet = new ArrayList<Integer>();
 		for (int i = 0; i < matrixDimension; i++) {
@@ -320,10 +352,13 @@ public class psi27_Intel1 extends psi27_Player {
 		return toRet;
 	}
 
+	/*
+	 * If I have some dominant strategies choose the one that harms the most to
+	 * the enemy (maximize my difference)
+	 */
 	protected int GetBetterDominant(List<Integer> dominant) {
 		int toRet = -1;
-		// If I have some dominant strategies choose the one that harms the most
-		// to the enemy (maximize my difference)
+
 		int maxDiff = 0;
 		for (int strategy = 0; strategy < dominant.size(); strategy++) {
 			int coord = dominant.get(strategy);
@@ -348,6 +383,11 @@ public class psi27_Intel1 extends psi27_Player {
 
 	// ***********************MESSAGES**************************************************
 
+	/*
+	 * I DON'T SET THE MATRIX TO UNKNOWN UNLESS IT SURPASS MY FACTOR
+	 * 
+	 * @see psi27_Player#ChangedMatrix(int)
+	 */
 	@Override
 	protected void ChangedMatrix(int percentage) {
 		if (percentage > percentageSetUnknown) {
@@ -382,6 +422,23 @@ public class psi27_Intel1 extends psi27_Player {
 			}
 		}
 		positionsLog.add(position);
+	}
+
+	/*
+	 * AUX METHOD
+	 */
+	private int ChooseAnotherFromlist(List<Integer> list, int value) {
+		int toRet = value;
+		if (list.size() > 1) {
+			for (int j = 0; j < list.size(); j++) {
+				int temp = list.get(j);
+				if (temp != value) {
+					toRet = temp;
+					break;
+				}
+			}
+		}
+		return toRet;
 	}
 
 }
